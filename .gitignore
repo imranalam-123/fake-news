@@ -1,0 +1,22 @@
+# datasets
+data/
+dataset/
+datasets/
+
+# ML models
+*.pkl
+*.pt
+*.pth
+*.h5
+*.joblib
+
+# CSV / large files
+*.csv
+*.tsv
+*.zip
+
+# Python
+__pycache__/
+venv/
+.env
+.ipynb_checkpoints/
