@@ -1,37 +1,47 @@
-from flask import Flask, request, jsonify, render_template
+import streamlit as st
 import pickle
 
-app = Flask(__name__)
-
+# -----------------------------
 # Load model & vectorizer
+# -----------------------------
 with open("model/fake_news_model.pkl", "rb") as f:
     model, vectorizer = pickle.load(f)
 
-# Home page (UI)
-@app.route("/", methods=["GET"])
-def home():
-    return render_template("index.html")
+# -----------------------------
+# Page config
+# -----------------------------
+st.set_page_config(
+    page_title="Fake News Detection",
+    page_icon="📰",
+    layout="centered"
+)
 
-# Predict from UI (HTML form)
-@app.route("/predict", methods=["POST"])
-def predict():
-    text = request.form.get("text")
+# -----------------------------
+# UI
+# -----------------------------
+st.title("📰 Fake News Detection")
+st.write("Enter a news article below to check whether it is **REAL** or **FAKE**.")
 
-    vec = vectorizer.transform([text])
-    prediction = model.predict(vec)[0]
+# Text input (replaces HTML form)
+text = st.text_area("News Text", height=220)
 
-    return render_template("index.html", prediction=prediction)
+# Predict button (replaces POST route)
+if st.button("Check News"):
+    if text.strip() == "":
+        st.warning("⚠️ Please enter some news text")
+    else:
+        vec = vectorizer.transform([text])
+        prediction = model.predict(vec)[0]
 
-# API endpoint (JSON)
-@app.route("/predict_api", methods=["POST"])
-def predict_api():
-    data = request.json
-    text = data.get("text", "")
+        if prediction == "FAKE":
+            st.error("🚨 This news is **FAKE**")
+        else:
+            st.success("✅ This news is **REAL**")
 
-    vec = vectorizer.transform([text])
-    prediction = model.predict(vec)[0]
-
-    return jsonify({"prediction": prediction})
-
-if __name__ == "__main__":
-    app.run(debug=True)
+# -----------------------------
+# Optional API-like output
+# -----------------------------
+st.markdown("---")
+st.subheader("🔎 Raw Prediction Output")
+if text.strip():
+    st.code({"prediction": prediction if "prediction" in locals() else None})
